@@ -18,19 +18,27 @@ def TestRequests(data):
 
         print("Geting...")
         response = ZTRequests.get(f"{edge_node_url}/testGet")
+        response2 = requests.get(f"{backend_server_url}/testGet")
         checkResponse(response)
+        checkResponseSimilarity(response, response2)
 
         print("Puting...")
         response = ZTRequests.put(f"{edge_node_url}/testPut", json=data)
+        response2 = requests.put(f"{backend_server_url}/testPut", json=data)
         checkResponse(response)
+        checkResponseSimilarity(response, response2)
 
         print("Deleting...")
         response = ZTRequests.delete(f"{edge_node_url}/testDelete")
+        response2 = requests.delete(f"{backend_server_url}/testDelete")
         checkResponse(response)
+        checkResponseSimilarity(response, response2)
 
         print("Heading...")
         response = ZTRequests.head(f"{edge_node_url}/testHead")
+        response2 = requests.head(f"{backend_server_url}/testHead")
         checkResponse(response)
+        checkResponseSimilarity(response, response2)
 
         print("\nDone")
 
