@@ -4,6 +4,7 @@ from TrustExceptions import MissingTrustData, LowTrustLevel
 
 # Trust Engine server URL TODO don't hard code this
 trustEngineUrl = "http://127.0.0.1:5001"  # Replace with the actual address and port
+backendServerUrl = "http://127.0.0.1:5002"  # Replace with the actual address and port
 
 # Create a Flask app instance
 app = Flask(__name__)
@@ -32,12 +33,11 @@ class EdgeNodeReceiver:
             trust = EdgeNodeReceiver.getPEPDecision(trustData)
             if not trust:
                 raise LowTrustLevel("Trust level is too low")
+            
+            # Forward the request to the backend server and return the response
+            response = EdgeNodeReceiver.forwardToBackendServer(request, data)
 
-            # TODO forward the request to the backend server
-            response = "testdata"
-
-            # TODO if there is a response from the backend server send it back to the client
-            return jsonify(response), 200
+            return response.text, response.status_code
         
         except MissingTrustData as e:
             error_message = f"Trust data is invalid: {e}"
@@ -96,6 +96,14 @@ class EdgeNodeReceiver:
             else:
                 print(f"{data[key]}")
         print()
+
+    @staticmethod
+    def forwardToBackendServer(request, data):
+        # forward the request to the backend server
+        full_url = backendServerUrl + request.path
+
+        # Make the request to the backend server
+        return requests.request(request.method, full_url, json=data)
 
     # Start the Flask app
     def run(self):
