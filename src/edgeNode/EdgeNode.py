@@ -103,7 +103,7 @@ class EdgeNodeReceiver:
         full_url = backendServerUrl + request.path
 
         # Make the request to the backend server
-        return requests.request(request.method, full_url, json=data)
+        return requests.request(request.method, full_url, data=data)
 
     # Start the Flask app
     def run(self):
