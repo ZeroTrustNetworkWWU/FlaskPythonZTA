@@ -3,8 +3,8 @@ import requests
 from TrustExceptions import MissingTrustData, LowTrustLevel
 
 # Trust Engine server URL TODO don't hard code this
-trustEngineUrl = "http://127.0.0.1:5001"  # Replace with the actual address and port
-backendServerUrl = "http://127.0.0.1:5002"  # Replace with the actual address and port
+trustEngineUrl = "http://127.0.0.1:5001"
+backendServerUrl = "http://127.0.0.1:5002"
 
 # Create a Flask app instance
 app = Flask(__name__)
@@ -27,7 +27,7 @@ class EdgeNodeReceiver:
             EdgeNodeReceiver.validateTrustData(trustData)
             EdgeNodeReceiver.getRemainingTrustData(request, trustData)
 
-            # print the trust data
+            # Print the trust data
             EdgeNodeReceiver.__printTrustData(trustData)
 
             trust = EdgeNodeReceiver.getPEPDecision(trustData)
@@ -37,23 +37,23 @@ class EdgeNodeReceiver:
             # Forward the request to the backend server and return the response
             response = EdgeNodeReceiver.forwardToBackendServer(request, data)
 
-            return response.text, response.status_code
+            return response.content, response.status_code
         
         except MissingTrustData as e:
             error_message = f"Trust data is invalid: {e}"
             print(error_message)
-            return jsonify({"error": error_message}), 401
+            return jsonify({"error": error_message}), 11
         except LowTrustLevel as e:
             error_message = f"Trust level is too low: {e}"
             print(error_message)
-            return jsonify({"error": error_message}), 402
+            return jsonify({"error": error_message}), 10
         except Exception as e:
             error_message = f"An error occurred: {e}"
             print(error_message)
             return jsonify({"error": error_message}), 500
     
-    # get the Trust engines decision on the trust of the client 
-    # returns true if the client is trusted and false if not
+    # Get the Trust engines decision on the trust of the client 
+    # Returns true if the client is trusted and false if not
     @staticmethod
     def getPEPDecision(trustData):
         try:
@@ -92,14 +92,14 @@ class EdgeNodeReceiver:
             if type(data[key]) == dict:
                 print()
                 for key2 in data[key]:
-                    print(f"\t{key2}: {data[key][key2]}")
+                    print(f"  {key2}: {data[key][key2]}")
             else:
                 print(f"{data[key]}")
         print()
 
     @staticmethod
     def forwardToBackendServer(request, data):
-        # forward the request to the backend server
+        # Forward the request to the backend server
         full_url = backendServerUrl + request.path
 
         # Make the request to the backend server
