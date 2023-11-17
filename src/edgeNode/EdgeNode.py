@@ -32,7 +32,7 @@ class EdgeNodeReceiver:
 
             trust = EdgeNodeReceiver.getPEPDecision(trustData)
             if not trust:
-                raise LowTrustLevel("Trust level is too low")
+                raise LowTrustLevel("Trust Engine Denied Access")
             
             # Forward the request to the backend server and return the response
             response = EdgeNodeReceiver.forwardToBackendServer(request, data)
@@ -40,17 +40,14 @@ class EdgeNodeReceiver:
             return response.content, response.status_code
         
         except MissingTrustData as e:
-            error_message = f"Trust data is invalid: {e}"
-            print(error_message)
-            return jsonify({"error": error_message}), 11
+            print(e)
+            return jsonify({"error": f"{e}"}), 500
         except LowTrustLevel as e:
-            error_message = f"Trust level is too low: {e}"
-            print(error_message)
-            return jsonify({"error": error_message}), 10
+            print(e)
+            return jsonify({"error": f"{e}"}), 500
         except Exception as e:
-            error_message = f"An error occurred: {e}"
-            print(error_message)
-            return jsonify({"error": error_message}), 500
+            print(e)
+            return jsonify({"error": f"{e}"}), 500
     
     # Get the Trust engines decision on the trust of the client 
     # Returns true if the client is trusted and false if not
@@ -61,7 +58,7 @@ class EdgeNodeReceiver:
             if response.status_code == 200:
                 return response.json()["trustLevel"]
             else:
-                print("Request failed to send to trust engine with status code:", response.status_code)
+                print("Trust Engine failed:", response.status_code)
                 return False
         except Exception as e:
             print(f"An error occurred: {e}")
@@ -82,7 +79,14 @@ class EdgeNodeReceiver:
     # TODO get any remaining trust data that is not provided by the client from the request ie., geolocation, ip, etc.
     @staticmethod  
     def getRemainingTrustData(request, trustData):
+        # Add the ip of the request to the trust data
         trustData["ip"] = request.remote_addr
+
+        # Add the path of the request to the trust data
+        trustData["resource"] = request.path
+
+        # Add the request method to the trust data
+        trustData["action"] = request.method
 
     # Prints the trust data in a readable format
     @staticmethod
