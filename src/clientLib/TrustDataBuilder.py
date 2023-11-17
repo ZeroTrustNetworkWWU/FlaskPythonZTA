@@ -1,4 +1,3 @@
-import requests
 import platform
 from datetime import datetime
 
@@ -7,12 +6,14 @@ class TrustDataBuilder:
     # Appends trust data to the data object
     @staticmethod
     def addTrustData(data):
-        user = TrustDataBuilder.__getUser()
+        # TODO add proper user and password validation
+        user, password = TrustDataBuilder.__getUserAndPassword()
         device = TrustDataBuilder.__getDevice()
         time = TrustDataBuilder.__getTime()
 
         trustData = {
             "user": user,
+            "password": password,
             "device": device,
             "time": time
         }
@@ -22,12 +23,13 @@ class TrustDataBuilder:
     # Returns a dict with the trust data and nothing else
     @staticmethod
     def getTrustData():
-        user = TrustDataBuilder.__getUser()
+        user, password = TrustDataBuilder.__getUserAndPassword()
         device = TrustDataBuilder.__getDevice()
         time = TrustDataBuilder.__getTime()
 
         trustData = {
             "user": user,
+            "password": password,
             "device": device,
             "time": time
         }
@@ -37,8 +39,8 @@ class TrustDataBuilder:
 
     # Get the user
     @staticmethod
-    def __getUser():
-        return "user"
+    def __getUserAndPassword():
+        return "member", "password"
 
     # Get info about the device
     @staticmethod
