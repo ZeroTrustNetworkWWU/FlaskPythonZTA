@@ -11,27 +11,27 @@ class testServer:
     # Test post
     @app.route('/testPost', methods=['POST'])
     def testPost():
-        return jsonify({'data': "What did you think I was going to do with that POST"})
+        return jsonify("POST was successful")
     
     # Test get
     @app.route('/testGet', methods=['GET'])
     def testGet():
-        return jsonify({'data': "What did you you think You would GET"})
+        return jsonify("GET was successful")
     
     # Test put 
     @app.route('/testPut', methods=['PUT'])
     def testPut():
-        return jsonify({'data': "What did you think I was going to do with that PUT"})
+        return jsonify("PUT was successful")
     
     # Test delete
     @app.route('/testDelete', methods=['DELETE'])
     def testDelete():
-        return jsonify({'data': "What did you think I was going to DELETE"})
+        return jsonify("DELETE was successful")
     
     # Test head
     @app.route('/testHead', methods=['HEAD'])
     def testHead():
-        return jsonify({'data': "What did you think I was going to do with that HEAD"})
+        return jsonify("HEAD was successful")
     
     # Start the server
     def run(self):
