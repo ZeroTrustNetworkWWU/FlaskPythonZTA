@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 import requests
-from TrustExceptions import MissingTrustData, LowTrustLevel
+from EdgeNodeExceptions import MissingTrustData, LowClientTrust
 
 # Trust Engine server URL TODO don't hard code this
 trustEngineUrl = "http://127.0.0.1:5001"
@@ -32,7 +32,7 @@ class EdgeNodeReceiver:
 
             trust = EdgeNodeReceiver.getPEPDecision(trustData)
             if not trust:
-                raise LowTrustLevel("Trust Engine Denied Access")
+                raise LowClientTrust("Trust Engine Denied Access")
             
             # Forward the request to the backend server and return the response
             response = EdgeNodeReceiver.forwardToBackendServer(request, data)
@@ -42,7 +42,7 @@ class EdgeNodeReceiver:
         except MissingTrustData as e:
             print(e)
             return jsonify({"error": f"{e}"}), 500
-        except LowTrustLevel as e:
+        except LowClientTrust as e:
             print(e)
             return jsonify({"error": f"{e}"}), 500
         except Exception as e:
