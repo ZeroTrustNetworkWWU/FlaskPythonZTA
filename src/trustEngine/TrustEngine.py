@@ -70,7 +70,23 @@ class TrustEngine:
         except Exception as e:
             print(e)
             return jsonify(response_data), 500
-    
+        
+    @app.route('/login', methods=['POST'])
+    def login():
+        pass
+
+    @app.route('/logout', methods=['POST'])
+    def logout():
+        pass
+
+    @app.route('/register', methods=['POST'])
+    def register():
+        pass
+
+    @app.route('/removeAccount', methods=['POST'])
+    def removeAccount():
+        pass
+
     @staticmethod
     def getRoleFromUser(user):
         return TrustEngine.userDatabase.get(user, None).get("role", None)
