@@ -40,7 +40,7 @@ class TrustDataBuilder:
     # Get the user
     @staticmethod
     def __getUserAndPassword():
-        return "member", "password"
+        return "user1", "password"
 
     # Get info about the device
     @staticmethod

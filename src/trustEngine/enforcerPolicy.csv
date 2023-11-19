@@ -1,2 +1,2 @@
 p, admin, /*, *
-p, member, /testGet, *
+p, user, /testGet, *
