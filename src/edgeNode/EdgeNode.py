@@ -30,9 +30,14 @@ class EdgeNodeReceiver:
             # Print the trust data
             EdgeNodeReceiver.__printTrustData(trustData)
 
-            trust = EdgeNodeReceiver.getPEPDecision(trustData)
+            trust, session = EdgeNodeReceiver.getPEPDecision(trustData)
             if not trust:
                 raise LowClientTrust("Trust Engine Denied Access")
+            
+            # TODO send login requests to a different trust engine route
+            # If this is a login request do not forward it to the backend server
+            if EdgeNodeReceiver.isLoginRequest(trustData):
+                return jsonify({"session": session}), 200
             
             # Forward the request to the backend server and return the response
             response = EdgeNodeReceiver.forwardToBackendServer(request, data)
@@ -45,9 +50,6 @@ class EdgeNodeReceiver:
         except LowClientTrust as e:
             print(e)
             return jsonify({"error": f"{e}"}), 500
-        except Exception as e:
-            print(e)
-            return jsonify({"error": f"{e}"}), 500
     
     # Get the Trust engines decision on the trust of the client 
     # Returns true if the client is trusted and false if not
@@ -56,19 +58,23 @@ class EdgeNodeReceiver:
         try:
             response = requests.post(f"{trustEngineUrl}/getDecision", json=trustData)
             if response.status_code == 200:
-                return response.json()["trustLevel"]
+                return response.json().get("trustLevel"), response.json().get("session", None)
             else:
                 print("Trust Engine failed:", response.status_code)
-                return False
+                return False, None
         except Exception as e:
             print(f"An error occurred: {e}")
-            return False
+            return False, None
         
     @staticmethod
     def getTrustData(data):
         trustData = data.get("_trustData")
         data.pop("_trustData", None)
         return trustData, data
+    
+    @staticmethod
+    def isLoginRequest(trustData):
+        return "login" in trustData.keys()
     
     # TODO validate the trust data is complete not just that it exists
     @staticmethod

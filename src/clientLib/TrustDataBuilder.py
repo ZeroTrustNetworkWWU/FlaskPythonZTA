@@ -3,17 +3,17 @@ from datetime import datetime
 
 # Class that gets the data needed to verify the trust of the client
 class TrustDataBuilder:
+    # Static members that are used to store trust data for this device
+    sessionToken = None
+
     # Appends trust data to the data object
     @staticmethod
     def addTrustData(data):
-        # TODO add proper user and password validation
-        user, password = TrustDataBuilder.__getUserAndPassword()
         device = TrustDataBuilder.__getDevice()
         time = TrustDataBuilder.__getTime()
 
         trustData = {
-            "user": user,
-            "password": password,
+            "session": TrustDataBuilder.sessionToken,
             "device": device,
             "time": time
         }
@@ -23,24 +23,17 @@ class TrustDataBuilder:
     # Returns a dict with the trust data and nothing else
     @staticmethod
     def getTrustData():
-        user, password = TrustDataBuilder.__getUserAndPassword()
         device = TrustDataBuilder.__getDevice()
         time = TrustDataBuilder.__getTime()
 
         trustData = {
-            "user": user,
-            "password": password,
+            "session": TrustDataBuilder.sessionToken,
             "device": device,
             "time": time
         }
         trustData = {"_trustData": trustData}
 
         return trustData
-
-    # Get the user
-    @staticmethod
-    def __getUserAndPassword():
-        return "user1", "password"
 
     # Get info about the device
     @staticmethod

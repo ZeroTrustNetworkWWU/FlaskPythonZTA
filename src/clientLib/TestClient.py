@@ -2,7 +2,6 @@ from ZTRequests import ZTRequests
 import requests
 import time
 
-
 # Edge node server URL TODO don't hard code this
 edge_node_url = "http://127.0.0.1:5000"
 
@@ -12,6 +11,16 @@ backend_server_url = "http://127.0.0.1:5002"
 # Function to send a request to the edge node
 def TestRequests(data):
     try:
+        print("Logging in...")
+        response = ZTRequests.login(f"{edge_node_url}/login", user=input("Enter Username: "), password=input("Enter Password:"))
+        if response.status_code != 200:
+            print("Login Failed")
+            return
+        else:
+            print("Login Successful")
+            print(f"Session: {response.json()['session']}\n")
+
+
         print("Posting...")
         response = ZTRequests.post(f"{edge_node_url}/testPost", json=data)
         response2 = requests.post(f"{backend_server_url}/testPost", json=data)

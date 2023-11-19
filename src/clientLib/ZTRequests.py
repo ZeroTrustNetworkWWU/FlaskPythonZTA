@@ -33,9 +33,19 @@ class ZTRequests:
         ZTRequests.__addTrustData(kwargs)
         return requests.head(url, **kwargs)
     
+    # send a login request
+    @staticmethod
+    def login(url, user, password, **kwargs):
+        payload = {"login": {"user": user, "password": password}}
+        ZTRequests.__addTrustData(kwargs)
+        kwargs["json"]["_trustData"].update(payload)
+        response = requests.post(url, **kwargs)
+        TrustDataBuilder.sessionToken = response.json().get("session", None)
+        return response
+        
     # append the trust data to the json data of the request
     @staticmethod
-    def __addTrustData(requestKwargs):
+    def __addTrustData(requestKwargs, ):
         if "json" in requestKwargs.keys():
             TrustDataBuilder.addTrustData(requestKwargs["json"])
         else:
