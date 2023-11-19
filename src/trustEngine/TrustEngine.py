@@ -35,20 +35,12 @@ class TrustEngine:
             data = request.get_json()
             session = data.get("session", None)
 
-            # TODO make a route for login requests specifically
-            # It the session is not in the request data then this is a login request and should be handled differently
-            if session is None and TrustEngine.validateUser(data):
-                session = TrustEngine.getNewSessionToken(data["login"]["user"])
-                response_data["session"] = session
-                response_data["trustLevel"] = True
-                return jsonify(response_data), 200
-
             if not TrustEngine.validateSession(session):
                 raise InvalidLogin("Invalid session token")
 
             role = TrustEngine.getRoleFromSession(session)
             if role is None:
-                raise UserNotFound("cannot match session to user")
+                raise UserNotFound("Cannot match session to role")
         
             # Validate that the user has access to the resource
             if not TrustEngine.accessEnforcer.enforce(role, data["resource"], data["action"]):
@@ -73,7 +65,27 @@ class TrustEngine:
         
     @app.route('/login', methods=['POST'])
     def login():
-        pass
+        response_data = {"trustLevel": False, "session": None}
+        try:
+            data = request.get_json()
+
+            if not TrustEngine.validateUser(data):
+                raise InvalidLogin("Invalid username or password")
+
+            # TODO validate the request more rigurously
+
+            session = TrustEngine.getNewSessionToken(data["login"]["user"])
+            
+            response_data["trustLevel"] = True
+            response_data["session"] = session
+            
+            return jsonify(response_data), 200
+        
+        except InvalidLogin as e:
+            return jsonify(response_data), 500
+        except Exception as e:
+            print(e)
+            return jsonify(response_data), 500
 
     @app.route('/logout', methods=['POST'])
     def logout():

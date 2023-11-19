@@ -27,17 +27,19 @@ class EdgeNodeReceiver:
             EdgeNodeReceiver.validateTrustData(trustData)
             EdgeNodeReceiver.getRemainingTrustData(request, trustData)
 
+            # If the request is a login request then query the trust engine for a login decision
+            if EdgeNodeReceiver.isLoginRequest(trustData):
+                session, trust = EdgeNodeReceiver.getPEPLoginDecision(trustData)
+                if not trust:
+                    raise LowClientTrust("Trust Engine Denied Access")
+                return jsonify({"session": session}), 200
+
             # Print the trust data
             EdgeNodeReceiver.__printTrustData(trustData)
 
-            trust, session = EdgeNodeReceiver.getPEPDecision(trustData)
+            trust = EdgeNodeReceiver.getPEPDecision(trustData)
             if not trust:
                 raise LowClientTrust("Trust Engine Denied Access")
-            
-            # TODO send login requests to a different trust engine route
-            # If this is a login request do not forward it to the backend server
-            if EdgeNodeReceiver.isLoginRequest(trustData):
-                return jsonify({"session": session}), 200
             
             # Forward the request to the backend server and return the response
             response = EdgeNodeReceiver.forwardToBackendServer(request, data)
@@ -52,19 +54,35 @@ class EdgeNodeReceiver:
             return jsonify({"error": f"{e}"}), 500
     
     # Get the Trust engines decision on the trust of the client 
-    # Returns true if the client is trusted and false if not
+    # returns the trust level of the client if the client is trusted and None if not
     @staticmethod
     def getPEPDecision(trustData):
         try:
             response = requests.post(f"{trustEngineUrl}/getDecision", json=trustData)
             if response.status_code == 200:
-                return response.json().get("trustLevel"), response.json().get("session", None)
+                return response.json().get("trustLevel")
             else:
                 print("Trust Engine failed:", response.status_code)
-                return False, None
+                return None
         except Exception as e:
             print(f"An error occurred: {e}")
-            return False, None
+            return None
+        
+    # Get the Trust engines response to a login request
+    # returns (session token, trustLevel) if the login was successful and None if not
+    @staticmethod
+    def getPEPLoginDecision(trustData):
+        try:
+            response = requests.post(f"{trustEngineUrl}/login", json=trustData)
+            data = response.json()
+            if response.status_code == 200:
+                return data.get("session"), data.get("trustLevel")
+            else:
+                print("Trust Engine failed:", response.status_code)
+                return None, None
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return None, None
         
     @staticmethod
     def getTrustData(data):
