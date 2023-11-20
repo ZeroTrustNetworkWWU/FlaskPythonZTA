@@ -58,7 +58,7 @@ class TrustEngine:
         except UserNotFound as e:
             return jsonify(response_data), 200
         except InvalidLogin as e:
-            return jsonify(response_data), 500
+            return jsonify(response_data), 200
         except Exception as e:
             print(e)
             return jsonify(response_data), 500
@@ -82,7 +82,7 @@ class TrustEngine:
             return jsonify(response_data), 200
         
         except InvalidLogin as e:
-            return jsonify(response_data), 500
+            return jsonify(response_data), 200
         except Exception as e:
             print(e)
             return jsonify(response_data), 500
