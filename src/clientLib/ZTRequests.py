@@ -3,35 +3,37 @@ from TrustDataBuilder import TrustDataBuilder
 
 # a class that provides the functinallity of the requests library but with zero trust data
 class ZTRequests:
+    verifyCert = "cert.pem"
+    
     # send a get request
     @staticmethod
     def get(url, **kwargs):
-        ZTRequests.__addTrustData(kwargs)
-        return requests.get(url, **kwargs)
+        ZTRequests.__addTrustData(kwargs)        
+        return requests.get(url, **kwargs, verify=ZTRequests.verifyCert)
 
     # send a post request
     @staticmethod
     def post(url, **kwargs):
         ZTRequests.__addTrustData(kwargs)
-        return requests.post(url, **kwargs)
+        return requests.post(url, **kwargs, verify=ZTRequests.verifyCert)
 
     # send a put request
     @staticmethod
     def put(url, **kwargs):
         ZTRequests.__addTrustData(kwargs)
-        return requests.put(url, **kwargs)
+        return requests.put(url, **kwargs, verify=ZTRequests.verifyCert)
 
     # send a delete request
     @staticmethod
     def delete(url, **kwargs):
         ZTRequests.__addTrustData(kwargs)
-        return requests.delete(url, **kwargs)
+        return requests.delete(url, **kwargs, verify=ZTRequests.verifyCert)
 
     # send a head request
     @staticmethod
     def head(url, **kwargs):
         ZTRequests.__addTrustData(kwargs)
-        return requests.head(url, **kwargs)
+        return requests.head(url, **kwargs, verify=ZTRequests.verifyCert)
     
     # send a special request to the edge node to tell it we want to login
     @staticmethod
@@ -39,7 +41,7 @@ class ZTRequests:
         payload = {"login": {"user": user, "password": password}}
         ZTRequests.__addTrustData(kwargs)
         kwargs["json"]["_trustData"].update(payload)
-        response = requests.post(url, **kwargs)
+        response = requests.post(url, **kwargs, verify=ZTRequests.verifyCert)
         TrustDataBuilder.sessionToken = response.json().get("session", None)
         return response
     

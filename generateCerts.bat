@@ -1,0 +1,1 @@
+openssl req -x509 --addext "subjectAltName=IP:127.0.0.1" -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 365

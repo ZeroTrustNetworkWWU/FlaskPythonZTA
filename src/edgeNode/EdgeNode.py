@@ -3,8 +3,8 @@ import requests
 from EdgeNodeExceptions import MissingTrustData, LowClientTrust
 
 # Trust Engine server URL TODO don't hard code this
-trustEngineUrl = "http://127.0.0.1:5001"
-backendServerUrl = "http://127.0.0.1:5002"
+trustEngineUrl = "https://127.0.0.1:5001"
+backendServerUrl = "https://127.0.0.1:5002"
 
 # Create a Flask app instance
 app = Flask(__name__)
@@ -58,7 +58,7 @@ class EdgeNodeReceiver:
     @staticmethod
     def getPEPDecision(trustData):
         try:
-            response = requests.post(f"{trustEngineUrl}/getDecision", json=trustData)
+            response = requests.post(f"{trustEngineUrl}/getDecision", json=trustData, verify="cert.pem")
             if response.status_code == 200:
                 return response.json().get("trustLevel")
             else:
@@ -73,7 +73,7 @@ class EdgeNodeReceiver:
     @staticmethod
     def getPEPLoginDecision(trustData):
         try:
-            response = requests.post(f"{trustEngineUrl}/login", json=trustData)
+            response = requests.post(f"{trustEngineUrl}/login", json=trustData, verify="cert.pem")
             data = response.json()
             if response.status_code == 200:
                 return data.get("session"), data.get("trustLevel")
@@ -131,11 +131,11 @@ class EdgeNodeReceiver:
         full_url = backendServerUrl + request.path
 
         # Make the request to the backend server
-        return requests.request(request.method, full_url, data=data)
+        return requests.request(request.method, full_url, data=data, verify="cert.pem")
 
     # Start the Flask app
     def run(self):
-        app.run(host=self.host, port=self.port)
+        app.run(host=self.host, port=self.port, ssl_context=('cert.pem', 'key.pem'))
 
 # Entry point
 if __name__ == "__main__":

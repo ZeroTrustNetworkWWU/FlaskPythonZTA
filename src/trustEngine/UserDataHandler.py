@@ -17,9 +17,9 @@ class UserDataHandler:
             cursor.execute("CREATE TABLE IF NOT EXISTS users (username TEXT, password TEXT, role TEXT)")
             cursor.execute("CREATE TABLE IF NOT EXISTS sessions (username TEXT, session TEXT, expiration TEXT)")
 
-            # add the admin user if it doesn't exist TODO remove this
+            # Add the admin user if it doesn't exist TODO remove this
             if not self.userExists("user1"):
-                cursor.execute("INSERT INTO users VALUES (?, ?, ?)", ("user1", "admin", "admin"))
+                cursor.execute("INSERT INTO users VALUES (?, ?, ?)", ("user1", "password1", "admin"))
             
             conn.commit()
 
@@ -43,6 +43,8 @@ class UserDataHandler:
             password = data["login"].get("password", None)
             if not self.userExists(user):
                 raise InvalidLogin("Invalid username")
+            if not self.validatePassword(user, password):
+                raise InvalidLogin("Invalid password")
             return True
         else:
             return False
@@ -83,3 +85,10 @@ class UserDataHandler:
             username = cursor.execute("SELECT * FROM users WHERE username=?", (user,))
 
         return username.fetchone() is not None
+    
+    def validatePassword(self, user, password):
+        with sqlite3.connect(self.dbName) as conn:
+            cursor = conn.cursor()
+            dbPassword = cursor.execute("SELECT password FROM users WHERE username=?", (user,)).fetchone()[0]
+            
+        return password == dbPassword

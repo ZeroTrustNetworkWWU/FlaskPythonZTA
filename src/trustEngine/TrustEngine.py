@@ -53,9 +53,6 @@ class TrustEngine:
             return jsonify(response_data), 200
         except InvalidLogin as e:
             return jsonify(response_data), 200
-        except Exception as e:
-            print(e)
-            return jsonify(response_data), 500
         
     @app.route('/login', methods=['POST'])
     def login():
@@ -64,7 +61,7 @@ class TrustEngine:
             data = request.get_json()
 
             if not TrustEngine.userDatabase.validateUser(data):
-                raise InvalidLogin("Invalid username or password")
+                raise InvalidLogin("Invalid login request")
 
             # TODO validate the request more rigurously
 
@@ -77,9 +74,6 @@ class TrustEngine:
         
         except InvalidLogin as e:
             return jsonify(response_data), 200
-        except Exception as e:
-            print(e)
-            return jsonify(response_data), 500
 
     @app.route('/logout', methods=['POST'])
     def logout():
@@ -95,7 +89,7 @@ class TrustEngine:
         
     # Start the Flask app
     def run(self):
-        app.run(host=self.host, port=self.port)
+        app.run(host=self.host, port=self.port, ssl_context=('cert.pem', 'key.pem'))
 
 # Entry point
 if __name__ == "__main__":
