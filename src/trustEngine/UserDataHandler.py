@@ -64,14 +64,20 @@ class UserDataHandler:
 
         if not self.userExists(username) or datetime.strptime(expiration, "%Y-%m-%d %H:%M:%S") < datetime.now():
             return False
+        
+        # Update the expiration time if there is less than 10 minutes left
+        if datetime.strptime(expiration, "%Y-%m-%d %H:%M:%S") < datetime.now() + timedelta(minutes=10):
+            with sqlite3.connect(self.dbName) as conn:
+                cursor = conn.cursor()
+                cursor.execute("UPDATE sessions SET expiration=? WHERE session=?", ((datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S"), session))
+                conn.commit()
 
         return True
         
     def getNewSessionToken(self, user):
         # Get the session token
         token = self.tokenHandler.getNewToken()
-        # TODO handle expiration better
-        expiration = datetime.now() + timedelta(minutes=30)
+        expiration = datetime.now() + timedelta(hours=1)
 
         # Add the session token to the database making sure to remove any previous sessions for the user
         with sqlite3.connect(self.dbName) as conn:
