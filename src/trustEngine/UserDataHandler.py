@@ -3,12 +3,14 @@
 import sqlite3
 from TrustEngineExceptions import InvalidLogin
 from TokenHandler import TokenHandler
+from PasswordHandler import PasswordHandler
 from datetime import datetime, timedelta
 
 class UserDataHandler:
     def __init__(self, dbName):
         self.dbName = dbName
         self.tokenHandler = TokenHandler()
+        self.passwordHandler = PasswordHandler()
 
         with sqlite3.connect(self.dbName) as conn:
             cursor = conn.cursor()
@@ -19,7 +21,7 @@ class UserDataHandler:
 
             # Add the admin user if it doesn't exist TODO remove this
             if not self.userExists("user1"):
-                cursor.execute("INSERT INTO users VALUES (?, ?, ?)", ("user1", "password1", "admin"))
+                cursor.execute("INSERT INTO users VALUES (?, ?, ?)", ("user1", self.passwordHandler.hash_password("password1"), "admin"))
             
             conn.commit()
 
@@ -90,5 +92,5 @@ class UserDataHandler:
         with sqlite3.connect(self.dbName) as conn:
             cursor = conn.cursor()
             dbPassword = cursor.execute("SELECT password FROM users WHERE username=?", (user,)).fetchone()[0]
-            
-        return password == dbPassword
+
+        return self.passwordHandler.verify_password(password, dbPassword)
