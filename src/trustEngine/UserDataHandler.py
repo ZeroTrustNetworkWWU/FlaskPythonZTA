@@ -70,6 +70,7 @@ class UserDataHandler:
     def getNewSessionToken(self, user):
         # Get the session token
         token = self.tokenHandler.getNewToken()
+        # TODO handle expiration better
         expiration = datetime.now() + timedelta(minutes=30)
 
         # Add the session token to the database making sure to remove any previous sessions for the user

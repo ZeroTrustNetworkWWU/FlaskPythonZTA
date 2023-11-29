@@ -1,9 +1,9 @@
 # a class for providing session tokens
+import secrets
 
 class TokenHandler:
-    def __init__(self):
-        self.tokenIndex = 0
+    def __init__(self, tokenLength=16):
+        self.tokenLength = tokenLength
 
     def getNewToken(self):
-        self.tokenIndex += 1
-        return self.tokenIndex
+        return secrets.token_hex(self.tokenLength)
