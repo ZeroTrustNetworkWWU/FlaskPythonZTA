@@ -40,16 +40,13 @@ class UserDataHandler:
         return self.getRoleFromUser(username)
     
     def validateUser(self, data):
-        if "login" in data.keys():
-            user = data["login"].get("user", None)
-            password = data["login"].get("password", None)
-            if not self.userExists(user):
-                raise InvalidLogin("Invalid username")
-            if not self.validatePassword(user, password):
-                raise InvalidLogin("Invalid password")
-            return True
-        else:
-            return False
+        user = data.get("user", None)
+        password = data.get("password", None)
+        if not self.userExists(user):
+            raise InvalidLogin("Invalid username")
+        if not self.validatePassword(user, password):
+            raise InvalidLogin("Invalid password")
+        return True
         
     def validateSession(self, session):
         if session is None:
@@ -89,6 +86,9 @@ class UserDataHandler:
         return token
     
     def userExists(self, user):
+        if user is None:
+            return False
+        
         with sqlite3.connect(self.dbName) as conn:
             cursor = conn.cursor()
             username = cursor.execute("SELECT * FROM users WHERE username=?", (user,))
@@ -96,6 +96,9 @@ class UserDataHandler:
         return username.fetchone() is not None
     
     def validatePassword(self, user, password):
+        if user is None or password is None:
+            return False
+
         with sqlite3.connect(self.dbName) as conn:
             cursor = conn.cursor()
             dbPassword = cursor.execute("SELECT password FROM users WHERE username=?", (user,)).fetchone()[0]

@@ -65,7 +65,7 @@ class TrustEngine:
 
             # TODO validate the request more rigurously
 
-            session = TrustEngine.userDatabase.getNewSessionToken(data["login"]["user"])
+            session = TrustEngine.userDatabase.getNewSessionToken(data["user"])
             
             response_data["trustLevel"] = True
             response_data["session"] = session
