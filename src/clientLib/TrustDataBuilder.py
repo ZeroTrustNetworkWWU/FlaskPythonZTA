@@ -8,28 +8,30 @@ class TrustDataBuilder:
 
     # Appends trust data to the data object
     @staticmethod
-    def addTrustData(data):
+    def addTrustData(data, requestType):
         device = TrustDataBuilder.__getDevice()
         time = TrustDataBuilder.__getTime()
 
         trustData = {
             "session": TrustDataBuilder.sessionToken,
             "device": device,
-            "time": time
+            "time": time,
+            "requestType": requestType
         }
 
         data["_trustData"] = trustData
 
     # Returns a dict with the trust data and nothing else
     @staticmethod
-    def getTrustData():
+    def getTrustData(requestType):
         device = TrustDataBuilder.__getDevice()
         time = TrustDataBuilder.__getTime()
 
         trustData = {
             "session": TrustDataBuilder.sessionToken,
             "device": device,
-            "time": time
+            "time": time,
+            "requestType": requestType
         }
         trustData = {"_trustData": trustData}
 

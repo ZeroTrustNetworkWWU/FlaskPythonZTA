@@ -38,8 +38,8 @@ class ZTRequests:
     # send a special request to the edge node to tell it we want to login
     @staticmethod
     def login(url, user, password, **kwargs):
-        payload = {"login": {"user": user, "password": password}}
-        ZTRequests.__addTrustData(kwargs)
+        payload = {"user": user, "password": password}
+        ZTRequests.__addTrustData(kwargs, requestType="login")
         kwargs["json"]["_trustData"].update(payload)
         response = requests.post(url, **kwargs, verify=ZTRequests.verifyCert)
         TrustDataBuilder.sessionToken = response.json().get("session", None)
@@ -62,9 +62,9 @@ class ZTRequests:
         
     # append the trust data to the json data of the request
     @staticmethod
-    def __addTrustData(requestKwargs, ):
+    def __addTrustData(requestKwargs, requestType="generic"):
         if "json" in requestKwargs.keys():
-            TrustDataBuilder.addTrustData(requestKwargs["json"])
+            TrustDataBuilder.addTrustData(requestKwargs["json"], requestType)
         else:
-            requestKwargs["json"] = TrustDataBuilder.getTrustData()
+            requestKwargs["json"] = TrustDataBuilder.getTrustData(requestType)
         
