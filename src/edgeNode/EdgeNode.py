@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import requests
 from EdgeNodeExceptions import MissingTrustData, LowClientTrust
+from RequestType import RequestType
 
 # Trust Engine server URL TODO don't hard code this
 trustEngineUrl = "https://127.0.0.1:5001"
@@ -27,15 +28,13 @@ class EdgeNodeReceiver:
             EdgeNodeReceiver.validateTrustData(trustData)
             EdgeNodeReceiver.getRemainingTrustData(request, trustData)
 
-            # If the request is a login request then query the trust engine for a login decision
-            if EdgeNodeReceiver.isLoginRequest(trustData):
-                session, trust = EdgeNodeReceiver.getPEPLoginDecision(trustData)
-                if not trust:
-                    raise LowClientTrust("Trust Engine Denied Access")
-                return jsonify({"session": session}), 200
-
-            # Print the trust data
+            # Print the trust data TODO replace this with logging
             EdgeNodeReceiver.__printTrustData(trustData)
+            
+            # If the request is not a generic request then it must be handled differently
+            requestType = EdgeNodeReceiver.getRequestType(trustData)
+            if requestType != RequestType.GENERIC:
+                return EdgeNodeReceiver.handleSpecialRequest(requestType, trustData)
 
             trust = EdgeNodeReceiver.getPEPDecision(trustData)
             if not trust:
@@ -52,6 +51,28 @@ class EdgeNodeReceiver:
         except LowClientTrust as e:
             print(e)
             return jsonify({"error": f"{e}"}), 500
+        
+
+    @staticmethod
+    def handleSpecialRequest(requestType, trustData):
+        match requestType:
+            case RequestType.LOGIN:
+                session, trust = EdgeNodeReceiver.getPEPLoginDecision(trustData)
+                if not trust:
+                    raise LowClientTrust("Trust Engine Denied Access")
+                return jsonify({"session": session}), 200
+            
+            case RequestType.LOGOUT:
+                pass
+
+            case RequestType.REGISTER:
+                pass
+
+            case RequestType.REMOVE_ACCOUNT:
+                pass
+            
+            case _:
+                return jsonify({"error": "Invalid request type"}), 500
     
     # Get the Trust engines decision on the trust of the client 
     # returns the trust level of the client if the client is trusted and None if not
@@ -91,8 +112,19 @@ class EdgeNodeReceiver:
         return trustData, data
     
     @staticmethod
-    def isLoginRequest(trustData):
-        return "login" in trustData.keys()
+    def getRequestType(data):
+        type = data.get("requestType")
+        match type:
+            case "login":
+                return RequestType.LOGIN
+            case "logout":
+                return RequestType.LOGOUT
+            case "register":
+                return RequestType.REGISTER
+            case "removeAccount":
+                return RequestType.REMOVE_ACCOUNT
+            case _:
+                return RequestType.GENERIC
     
     # TODO validate the trust data is complete not just that it exists
     @staticmethod
