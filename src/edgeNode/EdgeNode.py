@@ -63,14 +63,17 @@ class EdgeNodeReceiver:
                 return jsonify({"session": session}), 200
             
             case RequestType.LOGOUT:
-                pass
+                trust = EdgeNodeReceiver.getPEPLogoutDecision(trustData)
+                if not trust:
+                    raise LowClientTrust("Trust Engine Denied Access")
+                return jsonify("Logout succesful"), 200
 
             case RequestType.REGISTER:
                 pass
 
             case RequestType.REMOVE_ACCOUNT:
                 pass
-            
+
             case _:
                 return jsonify({"error": "Invalid request type"}), 500
     
@@ -104,6 +107,21 @@ class EdgeNodeReceiver:
         except Exception as e:
             print(f"An error occurred: {e}")
             return None, None
+        
+    # Get the Trust engines response to a logout request
+    @staticmethod
+    def getPEPLogoutDecision(trustData):
+        try:
+            response = requests.post(f"{trustEngineUrl}/logout", json=trustData, verify="cert.pem")
+            data = response.json()
+            if response.status_code == 200:
+                return data.get("trustLevel")
+            else:
+                print("Trust Engine failed:", response.status_code)
+                return None
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return None
         
     @staticmethod
     def getTrustData(data):

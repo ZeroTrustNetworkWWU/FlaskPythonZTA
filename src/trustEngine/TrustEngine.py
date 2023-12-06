@@ -77,7 +77,25 @@ class TrustEngine:
 
     @app.route('/logout', methods=['POST'])
     def logout():
-        pass
+        response_data = {"trustLevel": False}
+        try:
+            data = request.get_json()
+            session = data.get("session", None)
+
+            if not TrustEngine.userDatabase.validateSession(session):
+                raise InvalidLogin("Invalid session token")
+
+            # TODO validate the request more rigurously
+
+            # logout the user
+            TrustEngine.userDatabase.removeSession(session)
+
+            # Respond with the decision
+            response_data["trustLevel"] = True
+            return jsonify(response_data), 200
+
+        except InvalidLogin as e:
+            return jsonify(response_data), 200
 
     @app.route('/register', methods=['POST'])
     def register():

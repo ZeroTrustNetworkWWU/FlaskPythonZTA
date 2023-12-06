@@ -54,10 +54,12 @@ class UserDataHandler:
         
         with sqlite3.connect(self.dbName) as conn:
             cursor = conn.cursor()
-            username, expiration = cursor.execute("SELECT username, expiration FROM sessions WHERE session=?", (session,)).fetchone()
-
-        if username is None or expiration is None:
+            result = cursor.execute("SELECT username, expiration FROM sessions WHERE session=?", (session,)).fetchone()
+            
+        if result is None:
             return False
+        
+        username, expiration = result
 
         if not self.userExists(username) or datetime.strptime(expiration, "%Y-%m-%d %H:%M:%S") < datetime.now():
             return False
@@ -104,3 +106,9 @@ class UserDataHandler:
             dbPassword = cursor.execute("SELECT password FROM users WHERE username=?", (user,)).fetchone()[0]
 
         return self.passwordHandler.verify_password(password, dbPassword)
+    
+    def removeSession(self, session):
+        with sqlite3.connect(self.dbName) as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM sessions WHERE session=?", (session,))
+            conn.commit()

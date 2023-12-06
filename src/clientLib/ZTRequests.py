@@ -48,8 +48,9 @@ class ZTRequests:
     # send a special request to the edge node to tell it we want to logout
     @staticmethod
     def logout(url, **kwargs):
-        pass
-
+        ZTRequests.__addTrustData(kwargs, requestType="logout")
+        return requests.post(url, **kwargs, verify=ZTRequests.verifyCert)
+    
     # send a special request to the edge node to tell it we want to register
     @staticmethod
     def register(url, user, password, **kwargs):
