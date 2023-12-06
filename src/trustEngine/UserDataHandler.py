@@ -19,10 +19,11 @@ class UserDataHandler:
         adapter = casbin_sqlalchemy_adapter.Adapter("sqlite:///" + accessEnforcer)
         self.accessEnforcer = casbin.Enforcer(enforcerModel, adapter)
 
-        # Add the admin policy
+        # Add the admin and user default policies TODO remove this
         self.accessEnforcer.add_policy("admin", "/*", "*")
-        self.accessEnforcer.add_policy("user", "/testPost", "POST")
+        self.accessEnforcer.add_policy("user", "/testGet", "GET")
 
+        # Add the default user to the database
         with sqlite3.connect(self.dbName) as conn:
             cursor = conn.cursor()
 
