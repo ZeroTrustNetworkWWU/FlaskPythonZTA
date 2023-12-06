@@ -1,24 +1,15 @@
 from flask import Flask, request, jsonify
-from TrustEngineExceptions import MissingResourceAccess, UserNotFound, InvalidLogin
+from TrustEngineExceptions import MissingResourceAccess, UserNotFound, InvalidLogin, InvalidRegistration
 from UserDataHandler import UserDataHandler
-import casbin
-import casbin_sqlalchemy_adapter
 
 # Create a Flask app instance
 app = Flask(__name__)
 
 class TrustEngine:
     def __init__(self, host, port, enforcerModel, accessEnforcer, userDb):
-        # Prepare the user database
-        TrustEngine.userDatabase = UserDataHandler(userDb)
+        # Prepare the user database and access enforcment model
+        TrustEngine.userDatabase = UserDataHandler(userDb, enforcerModel, accessEnforcer)
 
-        # Define the access enforcer for the trust engine
-        adapter = casbin_sqlalchemy_adapter.Adapter("sqlite:///" + accessEnforcer)
-        TrustEngine.accessEnforcer = casbin.Enforcer(enforcerModel, adapter)
-
-        # TODO remove this
-        TrustEngine.accessEnforcer.add_policy("admin", "/*", "*")
-            
         self.host = host
         self.port = port
     
@@ -37,7 +28,7 @@ class TrustEngine:
                 raise UserNotFound("Cannot match session to role")
         
             # Validate that the user has access to the resource
-            if not TrustEngine.accessEnforcer.enforce(role, data["resource"], data["action"]):
+            if not TrustEngine.userDatabase.accessEnforcer.enforce(role, data["resource"], data["action"]):
                 raise MissingResourceAccess("User does not have access to this resource")
 
             # TODO validate the request more rigurously
@@ -99,7 +90,20 @@ class TrustEngine:
 
     @app.route('/register', methods=['POST'])
     def register():
-        pass
+        response_data = {"trustLevel": False}
+        try:
+            data = request.get_json()
+
+            if not TrustEngine.userDatabase.registerUser(data):
+                raise InvalidLogin("Invalid registration request")
+
+            # TODO validate the request more rigurously
+
+            response_data["trustLevel"] = True
+            return jsonify(response_data), 200
+
+        except InvalidRegistration as e:
+            return jsonify(response_data), 200
 
     @app.route('/removeAccount', methods=['POST'])
     def removeAccount():

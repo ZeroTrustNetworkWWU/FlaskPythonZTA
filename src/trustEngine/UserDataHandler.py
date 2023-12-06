@@ -1,16 +1,27 @@
 # A file that handles connection to the database
 
 import sqlite3
-from TrustEngineExceptions import InvalidLogin
+from TrustEngineExceptions import InvalidLogin, InvalidRegistration
 from TokenHandler import TokenHandler
 from PasswordHandler import PasswordHandler
 from datetime import datetime, timedelta
+import casbin
+import casbin_sqlalchemy_adapter
 
 class UserDataHandler:
-    def __init__(self, dbName):
+    defaultRole = "user"
+
+    def __init__(self, dbName, enforcerModel, accessEnforcer):
         self.dbName = dbName
         self.tokenHandler = TokenHandler()
         self.passwordHandler = PasswordHandler()
+
+        adapter = casbin_sqlalchemy_adapter.Adapter("sqlite:///" + accessEnforcer)
+        self.accessEnforcer = casbin.Enforcer(enforcerModel, adapter)
+
+        # Add the admin policy
+        self.accessEnforcer.add_policy("admin", "/*", "*")
+        self.accessEnforcer.add_policy("user", "/testPost", "POST")
 
         with sqlite3.connect(self.dbName) as conn:
             cursor = conn.cursor()
@@ -38,6 +49,26 @@ class UserDataHandler:
             username = cursor.execute("SELECT username FROM sessions WHERE session=?", (session,)).fetchone()[0]
 
         return self.getRoleFromUser(username)
+    
+    def registerUser(self, data):
+        user = data.get("user", None)
+        password = data.get("password", None)
+        role = UserDataHandler.defaultRole
+        if user is None or password is None:
+            raise InvalidRegistration("Invalid registration request")
+        self.addUser(user, password, role)
+        return True
+    
+    # Adds a user to the database first checking if the user already exists
+    def addUser(self, user, password, role):
+        # Check if the user already exists
+        if self.userExists(user):
+            raise InvalidRegistration("User already exists")
+
+        with sqlite3.connect(self.dbName) as conn:
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO users VALUES (?, ?, ?)", (user, self.passwordHandler.hash_password(password), role))
+            conn.commit()
     
     def validateUser(self, data):
         user = data.get("user", None)

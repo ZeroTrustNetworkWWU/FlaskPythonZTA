@@ -54,7 +54,10 @@ class ZTRequests:
     # send a special request to the edge node to tell it we want to register
     @staticmethod
     def register(url, user, password, **kwargs):
-        pass
+        payload = {"user": user, "password": password}
+        ZTRequests.__addTrustData(kwargs, requestType="register")
+        kwargs["json"]["_trustData"].update(payload)
+        return requests.post(url, **kwargs, verify=ZTRequests.verifyCert)
 
     # send a special request to the edge node to tell it we want to remove our account
     @staticmethod
