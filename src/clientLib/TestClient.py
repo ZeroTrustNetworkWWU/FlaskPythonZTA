@@ -12,7 +12,7 @@ backend_server_url = "https://127.0.0.1:5002"
 def TestRequests(data):
     try:
         print("Logging in...")
-        response = ZTRequests.login(f"{edge_node_url}/login", user=input("Enter Username: "), password=input("Enter Password:"))
+        response = ZTRequests.login(f"{edge_node_url}/login", user=input("Enter Username: "), password=input("Enter Password: "))
         if response.status_code != 200:
             print("Login Failed")
             return
@@ -35,6 +35,8 @@ def TestRequests(data):
         response = ZTRequests.put(f"{edge_node_url}/testPut", json=data)
         response2 = requests.put(f"{backend_server_url}/testPut", json=data, verify="cert.pem")
         validateResponse(response, response2)
+
+        ZTRequests.logout(f"{edge_node_url}/logout")
 
         print("Deleting...")
         response = ZTRequests.delete(f"{edge_node_url}/testDelete")
