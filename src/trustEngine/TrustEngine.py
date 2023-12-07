@@ -95,7 +95,7 @@ class TrustEngine:
             data = request.get_json()
 
             if not TrustEngine.userDatabase.registerUser(data):
-                raise InvalidLogin("Invalid registration request")
+                raise InvalidRegistration("Invalid registration request")
 
             # TODO validate the request more rigurously
 
