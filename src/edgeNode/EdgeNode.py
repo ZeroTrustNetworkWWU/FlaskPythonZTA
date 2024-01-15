@@ -2,17 +2,16 @@ from flask import Flask, request, jsonify
 import requests
 from EdgeNodeExceptions import MissingTrustData, LowClientTrust
 from RequestType import RequestType
-
-# Trust Engine server URL TODO don't hard code this
-trustEngineUrl = "https://127.0.0.1:5001"
-backendServerUrl = "https://127.0.0.1:5002"
+from EdgeNodeConfig import EdgeNodeConfig
 
 # Create a Flask app instance
 app = Flask(__name__)
 
 # Class that handles reciving data from the client and verifying the trust of the client before passing it on to the servers
 class EdgeNodeReceiver:
+
     def __init__(self, host, port):
+        EdgeNodeReceiver.config = EdgeNodeConfig()
         self.host = host
         self.port = port
 
@@ -85,7 +84,7 @@ class EdgeNodeReceiver:
     @staticmethod
     def getPEPDecision(trustData):
         try:
-            response = requests.post(f"{trustEngineUrl}/getDecision", json=trustData, verify="cert.pem")
+            response = requests.post(f"{EdgeNodeReceiver.config.trustEngineUrl}/getDecision", json=trustData, verify="cert.pem")
             if response.status_code == 200:
                 return response.json().get("trustLevel")
             else:
@@ -100,7 +99,7 @@ class EdgeNodeReceiver:
     @staticmethod
     def getPEPLoginDecision(trustData):
         try:
-            response = requests.post(f"{trustEngineUrl}/login", json=trustData, verify="cert.pem")
+            response = requests.post(f"{EdgeNodeReceiver.config.trustEngineUrl}/login", json=trustData, verify="cert.pem")
             data = response.json()
             if response.status_code == 200:
                 return data.get("session"), data.get("trustLevel")
@@ -115,7 +114,7 @@ class EdgeNodeReceiver:
     @staticmethod
     def getPEPLogoutDecision(trustData):
         try:
-            response = requests.post(f"{trustEngineUrl}/logout", json=trustData, verify="cert.pem")
+            response = requests.post(f"{EdgeNodeReceiver.config.trustEngineUrl}/logout", json=trustData, verify="cert.pem")
             data = response.json()
             if response.status_code == 200:
                 return data.get("trustLevel")
@@ -130,7 +129,7 @@ class EdgeNodeReceiver:
     @staticmethod
     def getPEPRegisterDecision(trustData):
         try:
-            response = requests.post(f"{trustEngineUrl}/register", json=trustData, verify="cert.pem")
+            response = requests.post(f"{EdgeNodeReceiver.config.trustEngineUrl}/register", json=trustData, verify="cert.pem")
             data = response.json()
             if response.status_code == 200:
                 return data.get("trustLevel")
@@ -196,7 +195,7 @@ class EdgeNodeReceiver:
     @staticmethod
     def forwardToBackendServer(request, data):
         # Forward the request to the backend server
-        full_url = backendServerUrl + request.path
+        full_url = EdgeNodeReceiver.config.backendServerUrl + request.path
 
         # Make the request to the backend server
         return requests.request(request.method, full_url, data=data, verify="cert.pem")

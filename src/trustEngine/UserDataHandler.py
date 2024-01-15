@@ -105,7 +105,26 @@ class UserDataHandler:
 
         return True
         
+    def getSessionFromUser(self, user):
+        if user is None:
+            return None
+
+        with sqlite3.connect(self.dbName) as conn:
+            cursor = conn.cursor()
+            session = cursor.execute("SELECT session FROM sessions WHERE username=?", (user,)).fetchone()
+
+        if session is None:
+            return None
+
+        return session[0]
+
     def getNewSessionToken(self, user):
+        # make sure the user is not already logged in if so 
+        # logout the old session and create a new one
+        session = self.getSessionFromUser(user)
+        if self.validateSession(session):
+            self.removeSession(session)
+
         # Get the session token
         token = self.tokenHandler.getNewToken()
         expiration = datetime.now() + timedelta(hours=1)

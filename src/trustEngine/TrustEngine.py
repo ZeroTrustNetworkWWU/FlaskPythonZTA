@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from TrustEngineExceptions import MissingResourceAccess, UserNotFound, InvalidLogin, InvalidRegistration
 from UserDataHandler import UserDataHandler
+from TrustEngineConfig import TrustEngineConfig
 
 # Create a Flask app instance
 app = Flask(__name__)
@@ -108,10 +109,40 @@ class TrustEngine:
     @app.route('/removeAccount', methods=['POST'])
     def removeAccount():
         pass
-        
+
+    @app.route('/getRoles', methods=['POST'])
+    def getRoles():
+        pass
+
+    @app.route('/getUsers', methods=['POST'])
+    def getUsers():
+        pass
+
+    @app.route('/getSessions', methods=['POST'])
+    def getSessions():
+        pass
+
+    @app.route('/addRole', methods=['POST'])
+    def addRole():
+        pass
+
+    @app.route('/removeRole', methods=['POST'])
+    def removeRole():
+        pass
+
+    @app.route('/addUser', methods=['POST'])
+    def addUser():
+        pass
+
+    @app.route('/removeUser', methods=['POST'])
+    def removeUser():
+        pass
+
     # Start the Flask app
     def run(self):
         app.run(host=self.host, port=self.port, ssl_context=('cert.pem', 'key.pem'))
+
+    
 
 # Entry point
 if __name__ == "__main__":

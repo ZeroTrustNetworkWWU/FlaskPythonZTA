@@ -1,18 +1,24 @@
 from ZTRequests import ZTRequests
 import requests
 import time
+from ClientAPIConfig import ClientAPIConfig
 
-# Edge node server URL TODO don't hard code this
-edge_node_url = "https://127.0.0.1:5000"
-
-# used to test responses directly from the backend server vs the edge node
-backend_server_url = "https://127.0.0.1:5002"
+config = ClientAPIConfig()
 
 # Function to send a request to the edge node
 def TestRequests(data):
     try:
+        print("Testing without logging in...")
+        print("Posting...")
+        response = ZTRequests.post(f"{config.edgeNodeUrl}/testPost", json=data)
+        response2 = requests.post(f"{config.backendServerUrl}/testPost", json=data, verify="cert.pem")
+
+        validateResponse(response, response2)
+
+        input("Press enter to continue...")
+
         print("Logging in...")
-        response = ZTRequests.login(f"{edge_node_url}/login", user=input("Enter Username: "), password=input("Enter Password: "))
+        response = ZTRequests.login(f"{config.edgeNodeUrl}/login", user=input("Enter Username: "), password=input("Enter Password: "))
         if response.status_code != 200:
             print("Login Failed")
             return
@@ -22,41 +28,71 @@ def TestRequests(data):
 
 
         print("Posting...")
-        response = ZTRequests.post(f"{edge_node_url}/testPost", json=data)
-        response2 = requests.post(f"{backend_server_url}/testPost", json=data, verify="cert.pem")
+        response = ZTRequests.post(f"{config.edgeNodeUrl}/testPost", json=data)
+        response2 = requests.post(f"{config.backendServerUrl}/testPost", json=data, verify="cert.pem")
         validateResponse(response, response2)
 
         print("Geting...")
-        response = ZTRequests.get(f"{edge_node_url}/testGet")
-        response2 = requests.get(f"{backend_server_url}/testGet", verify="cert.pem")
+        response = ZTRequests.get(f"{config.edgeNodeUrl}/testGet")
+        response2 = requests.get(f"{config.backendServerUrl}/testGet", verify="cert.pem")
         validateResponse(response, response2)
 
         print("Puting...")
-        response = ZTRequests.put(f"{edge_node_url}/testPut", json=data)
-        response2 = requests.put(f"{backend_server_url}/testPut", json=data, verify="cert.pem")
+        response = ZTRequests.put(f"{config.edgeNodeUrl}/testPut", json=data)
+        response2 = requests.put(f"{config.backendServerUrl}/testPut", json=data, verify="cert.pem")
         validateResponse(response, response2)
 
-        ZTRequests.logout(f"{edge_node_url}/logout")
-
         print("Deleting...")
-        response = ZTRequests.delete(f"{edge_node_url}/testDelete")
-        response2 = requests.delete(f"{backend_server_url}/testDelete", verify="cert.pem")
+        response = ZTRequests.delete(f"{config.edgeNodeUrl}/testDelete")
+        response2 = requests.delete(f"{config.backendServerUrl}/testDelete", verify="cert.pem")
         validateResponse(response, response2)
 
         print("Heading...")
-        response = ZTRequests.head(f"{edge_node_url}/testHead")
-        response2 = requests.head(f"{backend_server_url}/testHead", verify="cert.pem")
+        response = ZTRequests.head(f"{config.edgeNodeUrl}/testHead")
+        response2 = requests.head(f"{config.backendServerUrl}/testHead", verify="cert.pem")
+        validateResponse(response, response2)
+
+        print("Logging out...")
+        response = ZTRequests.logout(f"{config.edgeNodeUrl}/logout")
+
+        input("Press enter to continue...")
+
+        print("Registering...")
+        response = ZTRequests.register(f"{config.edgeNodeUrl}/register", user=input("Enter Username: "), password=input("Enter Password: "))
+        if response.status_code != 200:
+            print("Registration Failed")
+            return
+        else:
+            print("Registration Successful")
+
+        print("Logging in...")
+        response = ZTRequests.login(f"{config.edgeNodeUrl}/login", user=input("Enter Username: "), password=input("Enter Password: "))
+        if response.status_code != 200:
+            print("Login Failed")
+            return
+        else:
+            print("Login Successful")
+            print(f"Session: {response.json()['session']}\n")
+
+        print("Posting...")
+        response = ZTRequests.post(f"{config.edgeNodeUrl}/testPost", json=data)
+        response2 = requests.post(f"{config.backendServerUrl}/testPost", json=data, verify="cert.pem")
+        validateResponse(response, response2)
+
+        print("Geting...")
+        response = ZTRequests.get(f"{config.edgeNodeUrl}/testGet")
+        response2 = requests.get(f"{config.backendServerUrl}/testGet", verify="cert.pem")
         validateResponse(response, response2)
 
         print("\nDone\n")
 
         print("Testing transit time...")
         start = time.time()
-        response = ZTRequests.get(f"{edge_node_url}/testGet")
+        response = ZTRequests.get(f"{config.edgeNodeUrl}/testGet")
         end = time.time()
         print(f"Edge Node Transit time: {end - start}")
         start = time.time()
-        response = requests.get(f"{backend_server_url}/testGet", verify="cert.pem")
+        response = requests.get(f"{config.backendServerUrl}/testGet", verify="cert.pem")
         end = time.time()
         print(f"Backend server transit time: {end - start}")
 
