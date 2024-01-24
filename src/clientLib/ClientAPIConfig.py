@@ -5,8 +5,7 @@ class ClientAPIConfig:
     _instance = None
     config_path = "clientAPIConfig.json"
     default_config = {
-        "edgeNodeUrl": "https://127.0.0.1:5000",
-        "backendServerUrl": "https://127.0.0.1:5002"
+        "edgeNodeUrl": "https://127.0.0.1:5000"
     }
 
     def __new__(cls):
