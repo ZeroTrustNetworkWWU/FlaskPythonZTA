@@ -1,11 +1,18 @@
-from flask import Flask, make_response, redirect, render_template, request, jsonify, url_for, Response
+from flask import Flask, make_response, redirect, render_template, request, jsonify, url_for, Response, session
 import requests
 from EdgeNodeExceptions import MissingTrustData, LowClientTrust
 from RequestType import RequestType
 from EdgeNodeConfig import EdgeNodeConfig
+from datetime import timedelta
 
 # Create a Flask app instance
 app = Flask(__name__, static_url_path=None, static_folder=None)
+
+# configure sessios to expire after 30 minutes
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
+
+# Set the secret key for the session
+app.secret_key = EdgeNodeConfig().secretKey
 
 # Class that handles reciving data from the client and verifying the trust of the client before passing it on to the servers
 class EdgeNodeReceiver:
@@ -28,8 +35,8 @@ class EdgeNodeReceiver:
             else:
                 # TODO pull trust data from the cookies and add it to the data
                 # instead of just redirecting to the login page
-                session = request.cookies.get('session')
-                data = {"_trustData" : {"session": session}}
+                sessionKey = session.get('sessionKey')
+                data = {"_trustData" : {"session": sessionKey}}
 
             
             # Verify the trust data is here
@@ -37,7 +44,6 @@ class EdgeNodeReceiver:
             EdgeNodeReceiver.validateTrustData(trustData)
             EdgeNodeReceiver.getRemainingTrustData(request, trustData)
 
-            # Print the trust data TODO replace this with logging
             EdgeNodeReceiver.__printTrustData(trustData)
             
             # If the request is not a generic request then it must be handled differently
@@ -215,7 +221,7 @@ class EdgeNodeReceiver:
     def run(self):
         app.run(host=self.host, port=self.port, ssl_context=('cert.pem', 'key.pem'), threaded=False, debug=True)
 
-    
+    # Path for handling logins from a web browser
     @app.route('/login', methods=['GET'])
     def login():
         return redirect(url_for('renderLoginPage'))
@@ -244,13 +250,13 @@ class EdgeNodeReceiver:
             }
 
             # Send login request to the trust engine
-            session, trust = EdgeNodeReceiver.getPEPLoginDecision(trust_data)
+            sessionKey, trust = EdgeNodeReceiver.getPEPLoginDecision(trust_data)
             if not trust:
                 raise LowClientTrust("Trust Engine Denied Access")
 
-            # Set the session information in a cookie and set the expiration time to 10 minutes from now
+            # Set the session information
             response = make_response(redirect(url_for('successPage')))
-            response.set_cookie('session', session)
+            session.update({'sessionKey': sessionKey})
             return response
 
         except MissingTrustData as e:
@@ -266,11 +272,11 @@ class EdgeNodeReceiver:
     @app.route('/verification/success', methods=['GET'])
     def successPage():
         # Retrieve the session information from the cookie
-        session = request.cookies.get('session')
+        sessionKey = session.get('sessionKey')
 
         # If there is no session or request path return an error
-        if not session:
-            return jsonify({"error": "Missing Cookies"}), 500
+        if not sessionKey:
+            return jsonify({"error": "Missing Session"}), 500
         
         # redirect to the root
         return redirect(url_for('receive_request'))
