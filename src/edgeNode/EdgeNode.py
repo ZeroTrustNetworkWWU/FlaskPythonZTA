@@ -1,11 +1,11 @@
-from flask import Flask, request, jsonify
+from flask import Flask, make_response, redirect, render_template, request, jsonify, url_for, Response
 import requests
 from EdgeNodeExceptions import MissingTrustData, LowClientTrust
 from RequestType import RequestType
 from EdgeNodeConfig import EdgeNodeConfig
 
 # Create a Flask app instance
-app = Flask(__name__)
+app = Flask(__name__, static_url_path=None, static_folder=None)
 
 # Class that handles reciving data from the client and verifying the trust of the client before passing it on to the servers
 class EdgeNodeReceiver:
@@ -17,10 +17,20 @@ class EdgeNodeReceiver:
 
     # Route all requests to this function for verification
     @app.route('/', defaults={'path': ''})
-    @app.route('/<path:path>', methods=['POST', 'GET', 'PUT', 'DELETE', 'HEAD'])
+    @app.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD'])
     def receive_request(path):
+        print(request.path)
         try:
-            data = request.get_json()
+            data = None
+            # Get the data from the request
+            if (request.is_json):
+                data = request.get_json()
+            else:
+                # TODO pull trust data from the cookies and add it to the data
+                # instead of just redirecting to the login page
+                session = request.cookies.get('session')
+                data = {"_trustData" : {"session": session}}
+
             
             # Verify the trust data is here
             trustData, data = EdgeNodeReceiver.getTrustData(data)
@@ -40,13 +50,11 @@ class EdgeNodeReceiver:
                 raise LowClientTrust("Trust Engine Denied Access")
             
             # Forward the request to the backend server and return the response
-            response = EdgeNodeReceiver.forwardToBackendServer(request, data)
-
-            return response.content, response.status_code
+            return EdgeNodeReceiver.forwardToBackendServer(request, data)
         
         except MissingTrustData as e:
             print(e)
-            return jsonify({"error": f"{e}"}), 500
+            return jsonify({"error": f"{e}"}), 501
         except LowClientTrust as e:
             print(e)
             return jsonify({"error": f"{e}"}), 500
@@ -198,13 +206,76 @@ class EdgeNodeReceiver:
         full_url = EdgeNodeReceiver.config.backendServerUrl + request.path
 
         # Make the request to the backend server
-        return requests.request(request.method, full_url, data=data, verify="cert.pem")
+        response = requests.request(request.method, full_url, data=data, verify="cert.pem")
+
+        # return a clone of the response
+        return Response(response.content, status=response.status_code, headers=dict(response.headers), content_type=response.headers['content-type'])
 
     # Start the Flask app
     def run(self):
-        app.run(host=self.host, port=self.port, ssl_context=('cert.pem', 'key.pem'))
+        app.run(host=self.host, port=self.port, ssl_context=('cert.pem', 'key.pem'), threaded=False, debug=True)
+
+    
+    @app.route('/login', methods=['GET'])
+    def login():
+        return redirect(url_for('renderLoginPage'))
+        
+    # Handle logins from a web browser
+    # Any one has access to the login page so no trust data is needed
+    @app.route('/verification/loginPage', methods=['GET'])
+    def renderLoginPage():
+        return render_template('loginPage.html')
+
+    # Add a new route for handling the login form submission
+    @app.route('/verification/loginSubmit', methods=['POST'])
+    def handleLoginSubmit():
+        try:
+            # Extract login credentials from the form
+            username = request.form.get('username')
+            password = request.form.get('password')
+
+            # TODO get the remaining trust data from the request
+
+            # Create trust data with login credentials
+            trust_data = {
+                "user": username,
+                "password": password,
+                "requestType": "login"
+            }
+
+            # Send login request to the trust engine
+            session, trust = EdgeNodeReceiver.getPEPLoginDecision(trust_data)
+            if not trust:
+                raise LowClientTrust("Trust Engine Denied Access")
+
+            # Set the session information in a cookie and set the expiration time to 10 minutes from now
+            response = make_response(redirect(url_for('successPage')))
+            response.set_cookie('session', session)
+            return response
+
+        except MissingTrustData as e:
+            print(e)
+            return jsonify({"error": f"{e}"}), 500
+        except LowClientTrust as e:
+            print(e)
+            return redirect(url_for('renderLoginPage'))
+
+        
+    # Add a new route for the success page
+    # this just returns the page of the resource that was initially requested
+    @app.route('/verification/success', methods=['GET'])
+    def successPage():
+        # Retrieve the session information from the cookie
+        session = request.cookies.get('session')
+
+        # If there is no session or request path return an error
+        if not session:
+            return jsonify({"error": "Missing Cookies"}), 500
+        
+        # redirect to the root
+        return redirect(url_for('receive_request'))
 
 # Entry point
 if __name__ == "__main__":
-    edge_node = EdgeNodeReceiver(host='0.0.0.0', port=5000)
+    edge_node = EdgeNodeReceiver(host='0.0.0.0', port=5005)
     edge_node.run()
