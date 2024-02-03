@@ -1,0 +1,9 @@
+[submodule "EdgeNode"]
+	path = EdgeNode
+	url = https://github.com/ZeroTrustNetworkWWU/EdgeNode
+[submodule "TrustEngine"]
+	path = TrustEngine
+	url = https://github.com/ZeroTrustNetworkWWU/TrustEngine
+[submodule "PythonAPI"]
+	path = PythonAPI
+	url = https://github.com/ZeroTrustNetworkWWU/PythonAPI
