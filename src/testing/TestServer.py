@@ -35,7 +35,7 @@ class testServer:
     
     # Start the server
     def run(self):
-        app.run(host='0.0.0.0', port=5002, ssl_context=('cert.pem', 'key.pem'))
+        app.run(host='0.0.0.0', port=5002)
 
 # Entry point
 if __name__ == "__main__":
