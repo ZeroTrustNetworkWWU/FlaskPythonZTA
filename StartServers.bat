@@ -29,3 +29,7 @@ REM Start TestClient
 cd "../PythonAPI"
 cmd /c start.bat
 
+REM Start Admin GUI
+cd "../AdminGUI"
+cmd /c start.bat
+

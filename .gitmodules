@@ -7,3 +7,6 @@
 [submodule "PythonAPI"]
 	path = PythonAPI
 	url = https://github.com/ZeroTrustNetworkWWU/PythonAPI
+[submodule "AdminGUI"]
+	path = AdminGUI
+	url = https://github.com/ZeroTrustNetworkWWU/AdminGUI
