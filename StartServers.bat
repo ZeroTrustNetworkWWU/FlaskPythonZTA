@@ -1,7 +1,5 @@
 @echo off
 
-@echo off
-
 REM Check if venv exists
 if not exist venv (
     echo Creating virtual environment...
