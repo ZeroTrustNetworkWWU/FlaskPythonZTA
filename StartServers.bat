@@ -12,8 +12,8 @@ if not exist venv (
 )
 
 
-REM Start Backend server
-start cmd /k venv\Scripts\python.exe src\testing\TestServer.py
+@REM REM Start test Backend server
+@REM start cmd /k venv\Scripts\python.exe src\testing\TestServer.py
 
 REM Start EdgeNode server
 cd "EdgeNode"
@@ -23,9 +23,9 @@ REM Start TrustEngine server
 cd "../TrustEngine"
 cmd /c start.bat
 
-REM Start TestClient
-cd "../PythonAPI"
-cmd /c start.bat
+@REM REM Start TestClient
+@REM cd "../PythonAPI"
+@REM cmd /c start.bat
 
 REM Start Admin GUI
 cd "../AdminGUI"
