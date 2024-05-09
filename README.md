@@ -42,3 +42,18 @@ Configuring the network is done by modifying the
 configuration files in the directories of each of the sub-repositories. Specifically the `clientAPIConfig.json` file in the `PythonAPI` directory and the `edgeNodeConfig.json` file in the `EdgeNode` directory. For more information on how to configure the network, please refer to the README.md files in each of the sub-repositories.
 
 ## Contributing / Next steps:
+
+-- Convert the StartServers.bat script to a bash script for Linux development
+
+-- Improve the Edge nodes to be able to handle multiple backends
+instead of the current single backend. 
+
+-- Remove the ip of the backend from the edge node and instead use the trust engine to determine the backend to use.
+
+-- Convert everything to https. This will require the flask server be run with a certificate and key file. The Admin GUI will also need to be updated to use https.
+
+-- Improve the GUI role selection in the user tab to be more user friendly. Specifically, make a dropdown menu for selecting roles as you must select a valid role for that user.
+
+-- Add a display for logging in the Admin GUI. visualize the traffic in the network.
+
+-- Improve the FetchAPI.kt file in the AdminGUI so it sends more trust data to the trust engine. Potentially split it up and make it a Kotlin API for connecting to the trust engine (much like the PythonAPI).
