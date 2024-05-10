@@ -12,22 +12,22 @@ if not exist venv (
 )
 
 
-@REM REM Start test Backend server
-@REM start cmd /k venv\Scripts\python.exe src\testing\TestServer.py
-
-REM Start EdgeNode server
-cd "EdgeNode"
-cmd /c start.bat
+@REM REM Start EdgeNode server
+@REM cd "%0/../EdgeNode"
+@REM cmd /c start.bat
 
 REM Start TrustEngine server
-cd "../TrustEngine"
+cd "%0/../TrustEngine"
 cmd /c start.bat
 
 @REM REM Start TestClient
-@REM cd "../PythonAPI"
+@REM cd "%0/../PythonAPI"
 @REM cmd /c start.bat
 
-REM Start Admin GUI
-cd "../AdminGUI"
-cmd /c start.bat
+@REM REM Start Admin GUI
+@REM cd "%0/../AdminGUI"
+@REM cmd /c start.bat
 
+REM Start test TrustEngineAPI
+cd "%0/.."
+start cmd /k venv\Scripts\python.exe src\testing\Trying.py
