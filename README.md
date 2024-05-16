@@ -19,6 +19,7 @@ This repository exists to cleanly package all of the repositorys in to one place
 ## Installation:
 Pre-requisites:
 - Python 3.10 or higher
+- Java 21 or higher
 - Git (for cloning the repository)
 - Windows or Linux OS (Windows is easier for development purposes!)
 
