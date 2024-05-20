@@ -9,12 +9,22 @@ print(response.content)
 
 # Trying addRole
 print("\nTesting role adding...")
-response = requests.post(url+'/addRole')
-print(response.content)
+data = {
+    "role": {
+        "name": "testRole", 
+        "routes": ["/testHead"], 
+        "types": ["HEAD"]
+    }
+}
+# response = requests.post(url+'/addRole', json=data)
+# print(response.content)
 
 # Trying removeRole
 print("\nTesting role removal...")
-response = requests.put(url+'/removeRole')
+data = {
+    "name": "testRole"
+}
+response = requests.put(url+'/removeRole', json=data)
 print(response.content)
 
 # Trying getUsers
