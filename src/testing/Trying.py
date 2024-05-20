@@ -22,7 +22,7 @@ print("\nTesting users gathering...")
 response = requests.get(url+'/getUsers')
 print(response.content)
 
-# Trying addUser
+# Trying addUser (line ~63 in UserDataHandler)
 print("\nTesting user adding...")
 response = requests.post(url+'/addUser')
 print(response.content)
