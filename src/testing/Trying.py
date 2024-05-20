@@ -22,13 +22,24 @@ print("\nTesting users gathering...")
 response = requests.get(url+'/getUsers')
 print(response.content)
 
-# Trying addUser (line ~63 in UserDataHandler)
+# Trying addUser
 print("\nTesting user adding...")
 response = requests.post(url+'/addUser')
+print(response.content)
+# Using register instead
+print("\nUsing already implemented user registration...")
+data = {
+    "user": "testUser",
+    "password": "testPassword"
+}
+response = requests.post(url+'/register', json=data)
 print(response.content)
 
 # Trying removeUser
 print("\nTesting user removal...")
-response = requests.put(url+'/removeUser')
+data = {
+    "user": "testUser"
+}
+response = requests.put(url+'/removeUser', json=data)
 print(response.content)
 
