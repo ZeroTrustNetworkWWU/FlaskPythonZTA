@@ -46,8 +46,7 @@ configuration files in the directories of each of the sub-repositories. Specific
 
 -- Convert the StartServers.bat script to a bash script for Linux development
 
--- Improve the Edge nodes to be able to handle multiple backends
-instead of the current single backend. 
+-- Improve the Edge nodes to be able to handle multiple backends instead of the current single backend. 
 
 -- Remove the ip of the backend from the edge node and instead use the trust engine to determine the backend to use.
 
@@ -58,3 +57,9 @@ instead of the current single backend.
 -- Add a display for logging in the Admin GUI. visualize the traffic in the network.
 
 -- Improve the FetchAPI.kt file in the AdminGUI so it sends more trust data to the trust engine. Potentially split it up and make it a Kotlin API for connecting to the trust engine (much like the PythonAPI).
+
+-- Use a SVM or other machine learning model to classify 'normal' behavior in the network and use this to inform the trust levels of the users.
+
+-- Impliment a role based access control system to replace Casbin in the TrustEngine.
+
+-- Immpliment an IP reputation checker that does not require a third party service.
