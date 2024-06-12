@@ -16,15 +16,29 @@ data = {
         "types": ["HEAD"]
     }
 }
-# response = requests.post(url+'/addRole', json=data)
-# print(response.content)
+response = requests.post(url+'/addRole', json=data)
+print(response.content)
+
+# Confirmation
+print("\nConfirming role addition...")
+response = requests.get(url+'/getRoles')
+print(response.content)
 
 # Trying removeRole
 print("\nTesting role removal...")
 data = {
-    "name": "testRole"
+    "role": {
+        "name": "testRole",
+        "routes": ["/testHead"],
+        "types": ["HEAD"]
+    }
 }
 response = requests.put(url+'/removeRole', json=data)
+print(response.content)
+
+# Confirmation
+print("\nConfirming role deletion...")
+response = requests.get(url+'/getRoles')
 print(response.content)
 
 # Trying getUsers
