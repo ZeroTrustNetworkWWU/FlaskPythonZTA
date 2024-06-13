@@ -47,16 +47,12 @@ response = requests.get(url+'/getUsers')
 print(response.content)
 
 # Trying addUser
-print("\nTesting user adding...")
-response = requests.post(url+'/addUser')
-print(response.content)
-# Using register instead
-print("\nUsing already implemented user registration...")
+print("\nTesting user adding, using already implemented user registration...")
 data = {
     "user": "testUser",
     "password": "testPassword"
 }
-response = requests.post(url+'/register', json=data)
+response = requests.post(url+'/addUser', json=data)
 print(response.content)
 
 # Trying removeUser
