@@ -16,8 +16,8 @@ print("\nTesting role adding...")
 data = {
     "role": {
         "name": "testRole", 
-        "routes": ["/testHead"], 
-        "types": ["HEAD"]
+        "routes": "/testHead", 
+        "types": "HEAD"
     }
 }
 response = requests.post(url+'/addRole', json=data)
@@ -36,8 +36,8 @@ print("\nTesting role removal...")
 data = {
     "role": {
         "name": "testRole",
-        "routes": ["/testHead"],
-        "types": ["HEAD"]
+        "routes": "/testHead",
+        "types": "HEAD"
     }
 }
 response = requests.put(url+'/removeRole', json=data)
